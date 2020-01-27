@@ -1,3 +1,4 @@
 /credentials/*
 /cockroach/*
 /setup-scripts/*
+/node-dump/*
