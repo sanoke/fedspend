@@ -1,4 +1,7 @@
 /credentials/*
 /cockroach/*
-/setup-scripts/*
+/zz-cockroach/*
 /node-dump/*
+/zz-node-dump/*
+/setup-scripts/*
+/setup/vars.env
