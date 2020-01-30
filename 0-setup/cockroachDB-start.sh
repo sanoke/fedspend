@@ -1,6 +1,6 @@
 # - # - # - # - # - # - # - # - # - # - # - #
 #
-#   SETTING UP MY COCKROACHDB CLUSTER 
+#   SETTING UP COCKROACHDB CLUSTER: Starting it up!
 #   (4 nodes)
 #   github.com/sanoke/fedspend/wiki/Setting-up:-CockroachDB
 #
@@ -102,3 +102,22 @@ ssh ubuntu@$NODE1_PUBLIC_IP_DNS
 cockroach init --certs-dir=certs --host=$NODE1_PRIVATE_IP
 
 # CLUSTER IS READY FOR USE!
+
+# - 9 - CREATE A USER AND ACCESS ADMINUI
+#       (or any other users)
+
+# SSH into the instance where you uploaded the client cert & key
+ssh ubuntu@$WEBUI_PUBLIC_IP_DNS
+
+# launch Cockroach SQL client
+cockroach sql --certs-dir=certs --host=cockroachDB-balancer-4fdf4e82f5f5453f.elb.us-west-2.amazonaws.com
+
+# show all existing users... only the root user exists
+SHOW USERS; 
+
+# so we will alter the password of this user
+CREATE USER sanoke WITH PASSWORD $CDB_SANOKE_PW;
+
+# logout
+\q
+

@@ -1,6 +1,6 @@
 # - # - # - # - # - # - # - # - # - # - # - #
 #
-#   SETTING UP COCKROACHDB CLUSTER 
+#   SETTING UP COCKROACHDB CLUSTER: Certificates
 #   (4 nodes)
 #   github.com/sanoke/fedspend/wiki/Setting-up:-CockroachDB
 #
