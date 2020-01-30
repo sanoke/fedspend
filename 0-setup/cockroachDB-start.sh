@@ -21,7 +21,7 @@
 # - 7 - INSTALL AND START COCKROACHDB ON EACH NODE
 
 # 7.1 CDB installation for node 1
-ssh ubuntu@$NODE1_PUBLIC_IP_DNS 
+ssh ubuntu@$CDB_NODE1_PUBLIC_IP_DNS 
 wget -qO- https://binaries.cockroachdb.com/cockroach-v19.2.2.linux-amd64.tgz | tar xvz
 
 # --- copy binary into the `PATH`
@@ -98,8 +98,8 @@ cockroach start \
 
 
 # - 8 - INITIALIZE THE CLUSTER FROM WITHIN ANY OF ITS NODES
-ssh ubuntu@$NODE1_PUBLIC_IP_DNS 
-cockroach init --certs-dir=certs --host=$NODE1_PRIVATE_IP
+ssh ubuntu@$CDB_NODE1_PUBLIC_IP_DNS 
+cockroach init --certs-dir=certs --host=$CDB_NODE1_PRIVATE_IP
 
 # CLUSTER IS READY FOR USE!
 

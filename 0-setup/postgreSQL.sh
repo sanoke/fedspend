@@ -125,8 +125,8 @@ pg_restore --list usaspending-db_20200110 | sed '/MATERIALIZED VIEW DATA/D' > re
 # ----- the step below takes several hours
 pg_restore --jobs 32 --dbname postgresql://root:'password123'@localhost:5432/root --verbose --exit-on-error --use-list restore.list usaspending-db_20200110
 
-# view our restored table
+# view a list of our restored tables
 psql --dbname postgresql://root:'password123'@localhost:5432/root --command 'ANALYZE VERBOSE;' --echo-all --set ON_ERROR_STOP=on --set VERBOSITY=verbose --set SHOW_CONTEXT=always
-pg_restore --list ~/usaspending-db_20200110 | grep "MATERIALIZED VIEW DATA" > refresh.list
+pg_restore --list usaspending-db_20200110 | grep "MATERIALIZED VIEW DATA" > refresh.list
 
 
