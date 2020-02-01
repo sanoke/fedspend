@@ -71,6 +71,9 @@ cp /usr/local/spark/conf/spark-env.sh.template /usr/local/spark/conf/spark-env.s
 # export SPARK_MASTER_HOST=10.0.0.26
 # export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64/jre
 
+# ----- specify the private IPs of the worker nodes, 
+# ----- by listing them within `/usr/local/spark/conf/slaves`
+
 
 # - 5 - START THE CLUSTER
 sh /usr/local/spark/sbin/start-all.sh

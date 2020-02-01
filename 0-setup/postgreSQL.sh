@@ -46,7 +46,7 @@ sudo -u postgres psql
 sudo -u postgres /usr/bin/psql
 
 # ----- add SUPERUSER privleges 
-# (sql) ALTER USER root WITH ENCRYPTED PASSWORD 'password123';
+# (sql) ALTER USER root WITH ENCRYPTED PASSWORD '<enter-password>';
 # (sql) GRANT ALL PRIVILEGES ON DATABASE root TO root;
 # (sql) ALTER USER root WITH SUPERUSER CREATEDB CREATEROLE;
 
@@ -56,21 +56,19 @@ sudo -u postgres /usr/bin/psql
 
 # ----- change owner of mount point
 sudo chown -R postgres:postgres /database
-su postgres   # b/c owns the server process
-/usr/lib/postgresql/10/bin/initdb -D /database
-exit
+sudu -u postgres /usr/lib/postgresql/10/bin/initdb -D /database
 
 # ----- turn off postgresql so we can configure it
-service postgresql stop
+sudo service postgresql stop
 
-nano /etc/postgresql/10/main/postgresql.conf
+sudo nano /etc/postgresql/10/main/postgresql.conf
 # MODIFIED CONFIGURATIONS
 # data_directory = ‘/database’
-# shared_buffers = 32GB
-# max_worker_processes = 32             # 32 vCPUs on this machine
-# max_parallel_workers_per_gather = 32  # max
-# max_parallel_workers = 32
-# effective_cache_size = 96GB           # 75% of 128GB mem available
+# shared_buffers = 16GB                 # 25% of 64GB mem available
+# max_worker_processes = 16             # 16 vCPUs on this machine
+# max_parallel_workers_per_gather = 16  # max
+# max_parallel_workers = 16
+# effective_cache_size = 48GB           # 75% of 64GB mem available
 # advice on configs:
 # https://www.postgresql.org/docs/9.5/runtime-config-query.html
 # https://dev.to/pythonmeister/basic-postgresql-tuning-parameters-281
@@ -78,7 +76,7 @@ nano /etc/postgresql/10/main/postgresql.conf
 # https://wiki.postgresql.org/wiki/Tuning_Your_PostgreSQL_Server
 
 # ----- turn postgresql back on
-service postgresql start
+sudo service postgresql start
 
 
 # - 3 - DOWNLOAD ARCHIVE DUMP FILE FROM S3
@@ -102,7 +100,6 @@ aws s3 cp s3://sanoke-insight-fedspend-projectdata/usaspending-db_20200110.zip u
 sudo apt install unzip
 unzip usaspending-db_20200110.zip -d usaspending-db_20200110
 
-
 # - 4 - RESTORE AND INSPECT THE DATABASE
 # ----- after we configured the database location in postgresql.conf, the 
 # ----- record of the root user was lost, so we'lll recreate it
@@ -115,7 +112,7 @@ sudo -u postgres psql
 sudo -u postgres /usr/bin/psql
 
 # ----- add SUPERUSER privleges 
-# (sql) ALTER USER root WITH ENCRYPTED PASSWORD 'password123';
+# (sql) ALTER USER root WITH ENCRYPTED PASSWORD '<enter-password>'';
 # (sql) GRANT ALL PRIVILEGES ON DATABASE root TO root;
 # (sql) ALTER USER root WITH SUPERUSER CREATEDB CREATEROLE;
 
@@ -123,10 +120,10 @@ sudo -u postgres /usr/bin/psql
 pg_restore --list usaspending-db_20200110 | sed '/MATERIALIZED VIEW DATA/D' > restore.list
 
 # ----- the step below takes several hours
-pg_restore --jobs 32 --dbname postgresql://root:'password123'@localhost:5432/root --verbose --exit-on-error --use-list restore.list usaspending-db_20200110
+pg_restore --jobs 16 --dbname postgresql://root:'RWwuvdj75Me4'@localhost:5432/root --verbose --exit-on-error --use-list restore.list usaspending-db_20200110
 
 # view a list of our restored tables
-psql --dbname postgresql://root:'password123'@localhost:5432/root --command 'ANALYZE VERBOSE;' --echo-all --set ON_ERROR_STOP=on --set VERBOSITY=verbose --set SHOW_CONTEXT=always
+psql --dbname postgresql://root:'<enter-password>'@localhost:5432/root --command 'ANALYZE VERBOSE;' --echo-all --set ON_ERROR_STOP=on --set VERBOSITY=verbose --set SHOW_CONTEXT=always
 pg_restore --list usaspending-db_20200110 | grep "MATERIALIZED VIEW DATA" > refresh.list
 
 
