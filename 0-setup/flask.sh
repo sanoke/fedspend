@@ -7,7 +7,6 @@
 
 # RESOURCES
 # https://flask.palletsprojects.com/en/1.1.x/installation/#python-version
-# hello world: https://www.datasciencebytes.com/bytes/2015/02/24/running-a-flask-app-on-aws-ec2/
 # templates:   https://flask.palletsprojects.com/en/1.0.x/templating/
 
 ssh ubuntu@$WEBUI_PUBLIC_IP_DNS
