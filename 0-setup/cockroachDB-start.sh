@@ -69,7 +69,7 @@ sudo cp -i cockroach-v19.2.2.linux-amd64/cockroach /usr/local/bin/
 cockroach start \
   --certs-dir=certs \
   --store=node3-data \
-  --advertise-addr=$CDB_NODE3_PRIVATE_IP \
+  --advertise-addr=10.0.0.4$CDB_NODE3_PRIVATE_IP \
   --join=$CDB_NODE1_PRIVATE_IP \
   --join=$CDB_NODE2_PRIVATE_IP \
   --join=$CDB_NODE4_PRIVATE_IP \
@@ -103,20 +103,27 @@ cockroach init --certs-dir=certs --host=$CDB_NODE1_PRIVATE_IP
 
 # CLUSTER IS READY FOR USE!
 
-# - 9 - CREATE A USER AND ACCESS ADMINUI
+# - 9 - CREATE A USER to ACCESS ADMINUI
 #       (or any other users)
 
 # SSH into the instance where you uploaded the client cert & key
 ssh ubuntu@$WEBUI_PUBLIC_IP_DNS
 
 # launch Cockroach SQL client
-cockroach sql --certs-dir=certs --host=cockroachDB-balancer-4fdf4e82f5f5453f.elb.us-west-2.amazonaws.com
+cockroach sql --certs-dir=certs --host=$CDB_BALANCER_PRIVATE_IP
 
 # show all existing users... only the root user exists
 SHOW USERS; 
 
 # so we will alter the password of this user
 CREATE USER sanoke WITH PASSWORD $CDB_SANOKE_PW;
+CREATE USER migrater WITH PASSWORD $CDB_MIGRATER_PW;
+
+# while we're here, initialize our new database
+CREATE DATABASE fedspend;
+GRANT ALL ON DATABASE fedspend TO sanoke;
+GRANT ALL ON DATABASE fedspend TO migrater;
+SHOW DATABASES;
 
 # logout
 \q

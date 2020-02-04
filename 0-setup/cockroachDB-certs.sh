@@ -74,16 +74,38 @@ ssh ubuntu@$CDB_NODE4_PUBLIC_IP_DNS "mkdir certs"
 scp cockroach/certs/ca.crt cockroach/certs/node.crt cockroach/certs/node.key ubuntu@$CDB_NODE4_PUBLIC_IP_DNS:~/certs
 rm cockroach/certs/node.crt cockroach/certs/node.key    
 
-# 6.5 create client certificate and key for the root user
+# 6.5 create client certificate and key for new users
 cockroach cert create-client \
 root \
 --certs-dir=cockroach/certs \
 --ca-key=cockroach/my-safe-directory/ca.key
 
+cockroach cert create-client \
+migrater \
+--certs-dir=cockroach/certs \
+--ca-key=cockroach/my-safe-directory/ca.key
+
+cockroach cert create-client \
+sanoke \
+--certs-dir=cockroach/certs \
+--ca-key=cockroach/my-safe-directory/ca.key
+
 # --- upload the CA certificate and client certificate and key 
-# ---   to the machine where you will run a sample workload (web UI machine)
-ssh ubuntu@$WEBUI_PUBLIC_IP_DNS "mkdir certs"
+# ---   to the machines where you will run workloads 
+# ---   postgres machine (for migration)
+# ---   web UI machine (for serving results)
+ssh ubuntu@$POSTGRES_PUBLIC_IP_DNS "mkdir certs"
 scp cockroach/certs/ca.crt \
+  cockroach/certs/client.migrater.crt \
+  cockroach/certs/client.migrater.key \
   cockroach/certs/client.root.crt \
   cockroach/certs/client.root.key \
-  ubuntu@$WEBUI_PUBLIC_IP_DNS:~/certs
+  ubuntu@$POSTGRES_PUBLIC_IP_DNS:~/certs
+
+ssh ubuntu@$WEBUI_PUBLIC_IP_DNS "mkdir certs"
+scp cockroach/certs/ca.crt \
+  cockroach/certs/client.sanoke.crt \
+  cockroach/certs/client.sanoke.key \
+  cockroach/certs/client.root.crt \
+  cockroach/certs/client.root.key \
+  ubuntu@$WEBUI_PUBLIC_IP_DNS:~/certs  

@@ -56,7 +56,7 @@ sudo -u postgres /usr/bin/psql
 
 # ----- change owner of mount point
 sudo chown -R postgres:postgres /database
-sudu -u postgres /usr/lib/postgresql/10/bin/initdb -D /database
+sudo -u postgres /usr/lib/postgresql/10/bin/initdb -D /database
 
 # ----- turn off postgresql so we can configure it
 sudo service postgresql stop
@@ -69,11 +69,14 @@ sudo nano /etc/postgresql/10/main/postgresql.conf
 # max_parallel_workers_per_gather = 16  # max
 # max_parallel_workers = 16
 # effective_cache_size = 48GB           # 75% of 64GB mem available
+# listen_addresses = '*'                # so other machines can talk to the DB
 # advice on configs:
 # https://www.postgresql.org/docs/9.5/runtime-config-query.html
 # https://dev.to/pythonmeister/basic-postgresql-tuning-parameters-281
 # https://www.2ndquadrant.com/en/blog/postgresql96-parallel-sequential-scan/
 # https://wiki.postgresql.org/wiki/Tuning_Your_PostgreSQL_Server
+
+# ALSO EDITED PG_HBA.CONF FOR SPARK
 
 # ----- turn postgresql back on
 sudo service postgresql start
@@ -100,6 +103,7 @@ aws s3 cp s3://sanoke-insight-fedspend-projectdata/usaspending-db_20200110.zip u
 sudo apt install unzip
 unzip usaspending-db_20200110.zip -d usaspending-db_20200110
 
+
 # - 4 - RESTORE AND INSPECT THE DATABASE
 # ----- after we configured the database location in postgresql.conf, the 
 # ----- record of the root user was lost, so we'lll recreate it
@@ -112,18 +116,15 @@ sudo -u postgres psql
 sudo -u postgres /usr/bin/psql
 
 # ----- add SUPERUSER privleges 
-# (sql) ALTER USER root WITH ENCRYPTED PASSWORD '<enter-password>'';
+# (sql) ALTER USER root WITH ENCRYPTED PASSWORD '<enter-password>';
 # (sql) GRANT ALL PRIVILEGES ON DATABASE root TO root;
 # (sql) ALTER USER root WITH SUPERUSER CREATEDB CREATEROLE;
 
 # ----- now to restore the database
 pg_restore --list usaspending-db_20200110 | sed '/MATERIALIZED VIEW DATA/D' > restore.list
-
-# ----- the step below takes several hours
-pg_restore --jobs 16 --dbname postgresql://root:'RWwuvdj75Me4'@localhost:5432/root --verbose --exit-on-error --use-list restore.list usaspending-db_20200110
+# ----- the step below takes 5.3 hours to complete
+pg_restore --jobs 16 --dbname postgresql://root:'<enter-password>'@localhost:5432/root --verbose --exit-on-error --use-list restore.list usaspending-db_20200110
 
 # view a list of our restored tables
 psql --dbname postgresql://root:'<enter-password>'@localhost:5432/root --command 'ANALYZE VERBOSE;' --echo-all --set ON_ERROR_STOP=on --set VERBOSITY=verbose --set SHOW_CONTEXT=always
 pg_restore --list usaspending-db_20200110 | grep "MATERIALIZED VIEW DATA" > refresh.list
-
-
