@@ -108,4 +108,11 @@ scp cockroach/certs/ca.crt \
   cockroach/certs/client.sanoke.key \
   cockroach/certs/client.root.crt \
   cockroach/certs/client.root.key \
-  ubuntu@$WEBUI_PUBLIC_IP_DNS:~/certs  
+  ubuntu@$WEBUI_PUBLIC_IP_DNS:~/certs 
+
+scp cockroach/certs/ca.crt \
+  cockroach/certs/client.sanoke.crt \
+  cockroach/certs/client.sanoke.key \
+  cockroach/certs/client.root.crt \
+  cockroach/certs/client.root.key \
+  ubuntu@$CDB_NODE1_PUBLIC_IP_DNS:~/certs  
