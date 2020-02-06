@@ -25,7 +25,7 @@ tables = spark.read \
     .option("url", 'jdbc:postgresql://10.0.0.10:5432/root') \
     .option("dbtable", "information_schema.tables") \
     .option("user", "root") \
-    .option("password", "<enter-password>") \
+    .option("password", "RWwuvdj75Me4") \
     .load() \
     .filter("table_schema = 'public' AND table_type='BASE TABLE'")
 
@@ -36,7 +36,7 @@ keys = spark.read \
     .option("url", 'jdbc:postgresql://10.0.0.10:5432/root') \
     .option("dbtable", "information_schema.key_column_usage") \
     .option("user", "root") \
-    .option("password", "<enter-password>") \
+    .option("password", "RWwuvdj75Me4") \
     .load() 
 
 # helper table to combine table names with their PK
@@ -46,7 +46,7 @@ constraints = spark.read \
     .option("url", 'jdbc:postgresql://10.0.0.10:5432/root') \
     .option("dbtable", "information_schema.table_constraints") \
     .option("user", "root") \
-    .option("password", "<enter-password>") \
+    .option("password", "RWwuvdj75Me4") \
     .load()     
 
 
@@ -59,7 +59,7 @@ rowNum = spark.read \
     .option("url", 'jdbc:postgresql://10.0.0.10:5432/root') \
     .option("dbtable", query) \
     .option("user", "root") \
-    .option("password", "<enter-password>") \
+    .option("password", "RWwuvdj75Me4") \
     .load()
 
 # register the above DataFrames as a SQL temporary view
@@ -95,7 +95,7 @@ def readTable(tableName, pkey, rowNum, numPartitions):
         .option("url", 'jdbc:postgresql://10.0.0.10:5432/root') \
         .option("dbtable", query) \
         .option("user", "root") \
-        .option("password", "<enter-password>") \
+        .option("password", "RWwuvdj75Me4") \
         .option("partitionColumn", "rno") \
         .option("lowerBound", 0).option("upperBound", rowNum) \
         .option("numPartitions", numPartitions) \
@@ -104,22 +104,17 @@ def readTable(tableName, pkey, rowNum, numPartitions):
     except: 
         print("There's an issue with the partition process.", file=sys.stdout) 
         
-    print(table0.rdd.getNumPartitions(), file=sys.stdout) 
+    print("There are " + str(table0.rdd.getNumPartitions()) + " partitions " + \
+          "across " + str(rowNum) + " rows.", file=sys.stdout) 
 
-    try:
-        num_rows = table0.count()
-    except:
-        num_rows = 0
-        err = "There's an issue with running functions on the Dataframe " + tableName + "."
-        print(err, file=sys.stdout) 
-    
-    print("There are " + str(num_rows) + " rows in table *** " + tableName + " ***", file=sys.stdout)
-    
     return table0
 
 
 # function to write a table to cockroachDB    
-def writeTable(table0, tableName):
+def writeTable(table0, tableName, saveMode="error"):
+    # have to repartition the table b/c cockroachDB can't take too many rows
+    # at a time, max is around 1000
+    # https://forum.cockroachlabs.com/t/whats-the-best-way-to-do-bulk-insert/58
     cluster   = 'jdbc:postgresql://10.0.0.13:26257/fedspend'
     table0.write \
     .format("jdbc") \
@@ -127,6 +122,6 @@ def writeTable(table0, tableName):
     .option("url", cluster) \
     .option("dbtable", tableName) \
     .option("user", "migrater") \
-    .option("password", "<enter-password>") \
-    .save()
+    .option("password", "RWwuvdj75Me4") \
+    .save(mode=saveMode)
     print(tableName + '_M', file=sys.stdout)
