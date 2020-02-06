@@ -25,7 +25,7 @@ tables = spark.read \
     .option("url", 'jdbc:postgresql://10.0.0.10:5432/root') \
     .option("dbtable", "information_schema.tables") \
     .option("user", "root") \
-    .option("password", "RWwuvdj75Me4") \
+    .option("password", "<enter-password>") \
     .load() \
     .filter("table_schema = 'public' AND table_type='BASE TABLE'")
 
@@ -36,7 +36,7 @@ keys = spark.read \
     .option("url", 'jdbc:postgresql://10.0.0.10:5432/root') \
     .option("dbtable", "information_schema.key_column_usage") \
     .option("user", "root") \
-    .option("password", "RWwuvdj75Me4") \
+    .option("password", "<enter-password>") \
     .load() 
 
 # helper table to combine table names with their PK
@@ -46,7 +46,7 @@ constraints = spark.read \
     .option("url", 'jdbc:postgresql://10.0.0.10:5432/root') \
     .option("dbtable", "information_schema.table_constraints") \
     .option("user", "root") \
-    .option("password", "RWwuvdj75Me4") \
+    .option("password", "<enter-password>") \
     .load()     
 
 
@@ -59,7 +59,7 @@ rowNum = spark.read \
     .option("url", 'jdbc:postgresql://10.0.0.10:5432/root') \
     .option("dbtable", query) \
     .option("user", "root") \
-    .option("password", "RWwuvdj75Me4") \
+    .option("password", "<enter-password>") \
     .load()
 
 # register the above DataFrames as a SQL temporary view
@@ -95,13 +95,12 @@ def readTable(tableName, pkey, rowNum, numPartitions):
         .option("url", 'jdbc:postgresql://10.0.0.10:5432/root') \
         .option("dbtable", query) \
         .option("user", "root") \
-        .option("password", "RWwuvdj75Me4") \
+        .option("password", "<enter-password>") \
         .option("partitionColumn", "rno") \
         .option("lowerBound", 0).option("upperBound", rowNum) \
         .option("numPartitions", numPartitions) \
         .load()  \
         .cache()
-        .persist() 
     except: 
         print("There's an issue with the partition process.", file=sys.stdout) 
         
@@ -120,16 +119,14 @@ def readTable(tableName, pkey, rowNum, numPartitions):
 
 
 # function to write a table to cockroachDB    
-def writeTable(table0, tableName, clusterIP):
-    cluster   = 'jdbc:postgresql://' + clusterIP + ':26257/fedspend'    
-    # cluster   = 'CDB-balancer-1d47bc5798cad958.elb.us-west-2.amazonaws.com' + \
-    #             ':26257/fedspend'
+def writeTable(table0, tableName):
+    cluster   = 'jdbc:postgresql://10.0.0.13:26257/fedspend'
     table0.write \
     .format("jdbc") \
     .option("driver", "org.postgresql.Driver") \
     .option("url", cluster) \
     .option("dbtable", tableName) \
     .option("user", "migrater") \
-    .option("password", "RWwuvdj75Me4") \
+    .option("password", "<enter-password>") \
     .save()
     print(tableName + '_M', file=sys.stdout)

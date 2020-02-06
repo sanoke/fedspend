@@ -7,8 +7,6 @@
 
 from migrationhelp import *
 
-CDB_clusters = ['10.0.0.4', '10.0.0.6', '10.0.0.24', '10.0.0.23']
-
 # 64 cores * 3 partitions per core + sauce
 numPartitions = 200 
 
@@ -24,6 +22,6 @@ for idx in range(numTables):
 
     tempTable = readTable(tab0, pkey0, upperB, numPartitions)
 
-    writeTable(tempTable, tab0, clusterIPs[idx])
+    writeTable(tempTable, tab0)
     
     spark.catalog.clearCache()
