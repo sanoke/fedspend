@@ -11,7 +11,6 @@ from migrationhelp import *
 # (for reading data)
 numPartitions = 200
 
-# rows that CDB can take in one write (heuristic)
 CDBrows = 10**6
 
 numTables = len(pkeys)
