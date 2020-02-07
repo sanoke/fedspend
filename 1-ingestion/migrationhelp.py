@@ -14,7 +14,7 @@ spark = SparkSession \
     .config('spark.default.parallelism', '100') \
     .config('spark.history.retainedApplications', '10') \
     .config('spark.network.timeout', '300s') \
-    .config('spark.executor.heartbeatInterval', '30s') \
+    .config('spark.executor.heartbeatInterval', '60s') \
     .config('spark.task.maxFailures', '4') \
     .getOrCreate()
 
@@ -99,7 +99,7 @@ def readTable(tableName, pkey, rowNum, numPartitions):
         .option("partitionColumn", "rno") \
         .option("lowerBound", 0).option("upperBound", rowNum) \
         .option("numPartitions", numPartitions) \
-        .load()  \
+        .load() \
         .cache()
     except: 
         print("There's an issue with the partition process.", file=sys.stdout) 
@@ -124,4 +124,3 @@ def writeTable(table0, tableName, saveMode="error"):
     .option("user", "migrater") \
     .option("password", "RWwuvdj75Me4") \
     .save(mode=saveMode)
-    print(tableName + '_M', file=sys.stdout)
