@@ -42,8 +42,7 @@ query = "(SELECT ROW_NUMBER() OVER(ORDER BY (SELECT NULL)) AS rno, " + \
         "t.legal_entity_congressional AS district, " + \
         "t.naics AS code, " + \
         "t.legal_entity_country_code AS country_code " + \
-        "FROM transaction_fpds t " + \
-        "LIMIT 1000000) XXX" 
+        "FROM transaction_fpds t ) XXX" 
 
 # read the table from postgresql
 table0 = spark.read \
@@ -116,8 +115,6 @@ table0 = table0.withColumn('year', toYear('year'))
 table0 = table0.withColumn('district', toDist('district'))
 table0 = table0.withColumn('country_code', usa('country_code'))
 
-print(table0.show())
-
 numSplits = 100
 tempTable_split = table0.randomSplit( [1.0] * numSplits )
 
@@ -126,7 +123,7 @@ print("Split table successfully.")
 # for every dataframe in the list...
 counter = 1
 for df in tempTable_split:
-    tab0 = "govcontracts"
+    tab0 = "govcontract_data"
 
     # broadcast the smaller legislator dataset to workers 
     # then join to financial data
@@ -134,11 +131,7 @@ for df in tempTable_split:
                           on = ['state', 'district', 'year'], \
                           how = 'left_outer')
 
-    print("combined table... (" + str(counter) + " of " + str(numSplits) + ")")
-    print(combinedTab.show())
-
     # write the result to CDB
-    print(tab0 + ': trying to write chunk ' + str(counter) + ' of ' + str(numSplits), file=sys.stdout) 
     writeTable(df, tab0, saveMode="append")
     print(tab0 + ': wrote chunk ' + str(counter) + ' of ' + str(numSplits), file=sys.stdout) 
     counter += 1
