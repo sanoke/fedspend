@@ -1,7 +1,10 @@
 # IMPORTING GOVERNMENT CONTRACT DATA + JOIN WITH LEGISLATOR
 # - provided by https://github.com/unitedstates/congress-legislators
-# wget https://theunitedstates.io/congress-legislators/legislators-current.csv
-# wget https://theunitedstates.io/congress-legislators/legislators-historical.csv
+# wget https://theunitedstates.io/congress-legislators/legislators-current.json
+# wget https://theunitedstates.io/congress-legislators/legislators-historical.json
+# scp 2-data-processing/*.py ubuntu@$POSTGRES_PUBLIC_IP_DNS:~
+# tmux set-option -g history-limit 5000 \; new-session
+# time spark-submit --driver-memory 48g contracts.py > sparrk-output.txt
 
 # strategy is to read in legislator JSON,
 # parse into several lists, 
@@ -12,7 +15,11 @@ from pyspark.sql.types import IntegerType
 from pyspark.sql.functions import udf, col, expr, broadcast
 import sys
 
+print("Importing the legislators module...")
+
 from legislators import *
+
+print("Completed importing the legislators module.")
 
 spark = SparkSession \
     .builder \
@@ -27,7 +34,7 @@ spark = SparkSession \
     .config('spark.network.timeout', '300s') \
     .config('spark.executor.heartbeatInterval', '60s') \
     .config('spark.task.maxFailures', '4') \
-    .config('spark.sql.autoBroadcastJoinThreshold', str(5*10**7))
+    .config('spark.sql.autoBroadcastJoinThreshold', str(5*10**7)) \
     .getOrCreate()
 
 
@@ -92,7 +99,7 @@ print("Split table " + tab0 + " successfully.")
 # for every dataframe in the list...
 counter = 1
 for df in tempTable_split:
-    tab0 = "transaction_fpds"
+    tab0 = "govcontracts"
 
     # broadcast the smaller legislator dataset to workers 
     # then join to financial data
