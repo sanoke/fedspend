@@ -11,15 +11,11 @@
 # then create a pySpark DataFrame from those lists 
 
 from pyspark.sql import SparkSession 
-from pyspark.sql.types import IntegerType
+from pyspark.sql.types import IntegerType, StringType
 from pyspark.sql.functions import udf, col, expr, broadcast
 import sys
 
-print("Importing the legislators module...")
-
 from legislators import *
-
-print("Completed importing the legislators module.")
 
 spark = SparkSession \
     .builder \
@@ -39,21 +35,18 @@ spark = SparkSession \
 
 
 # pull contract data from postgresql (71+ million rows)
-query = "(SELECT t.action_date AS date, " + \
+query = "(SELECT ROW_NUMBER() OVER(ORDER BY (SELECT NULL)) AS rno, " + \
+        "t.action_date AS year, " + \
         "t.federal_action_obligation AS amount, " + \
-        "n.description AS industry, " + \
         "t.legal_entity_state_code AS state, " + \
         "t.legal_entity_congressional AS district, " + \
-        '(CASE WHEN t.legal_entity_country_code = "UNITED STATES" THEN "USA"' + \
-        "      ELSE t.legal_entity_country_code) AS country_code " + \
+        "t.naics AS code, " + \
+        "t.legal_entity_country_code AS country_code " + \
         "FROM transaction_fpds t " + \
-        "LEFT JOIN (SELECT * FROM naics WHERE n.year = 2017) n " + \
-        "ON n.code = t.naics LIMIT 100000) XXX" 
-
+        "LIMIT 1000000) XXX" 
 
 # read the table from postgresql
-try: 
-    table0 = spark.read \
+table0 = spark.read \
     .format("jdbc") \
     .option("driver", "org.postgresql.Driver") \
     .option("url", 'jdbc:postgresql://10.0.0.10:5432/root') \
@@ -65,36 +58,70 @@ try:
     .option("numPartitions", 200) \
     .load() \
     .cache()
-except: 
-    print("There's an issue with the partition process.", file=sys.stdout) 
-    
-print("There are " + str(table0.rdd.getNumPartitions()) + " partitions " + \
-        "across " + str(rowNum) + " rows.", file=sys.stdout) 
 
+# loading a second table of labels that i want to join to
+query2 = "(SELECT code, description FROM naics WHERE year = 2017) XXX"
+industry_labels = spark.read \
+    .format("jdbc") \
+    .option("driver", "org.postgresql.Driver") \
+    .option("url", 'jdbc:postgresql://10.0.0.10:5432/root') \
+    .option("dbtable", query2) \
+    .option("user", "root") \
+    .option("password", "RWwuvdj75Me4") \
+    .load()
+industry_labels.createOrReplaceTempView("industry_labels")
+table0.createOrReplaceTempView("table0")
+table0 = broadcast(spark.table("industry_labels")).join(spark.table("table0"), "code", "left_outer")
 
 # some light cleaning of date strings to just year
 def toYear(s):
-    if year < 1000:
-        return int(s[-4:])
-    else: 
-        return int(s[0:4])
+    try:
+        year = int(s[-4:])
+    except:
+        year = None
+    
+    try: 
+        year = int(s[0:4])
+    except: 
+        year = None
+
+    return(year)
+
 
 # removing the state label from district identifier
 def toDist(s):
-    if len(s) > 2:
-        return int(s[-2:])
-    else:
-        return int(s)
+    try: 
+        if len(s) > 2:
+            return int(s[-2:])
+        else:
+            return int(s)
+    except:
+        return None
+
+# consolidating 'usa' versus 'united states'
+def usa(s):
+    try: 
+        if s == 'USA':
+            return 'UNITED STATES'
+        else:
+            return s
+    except:
+        return s       
 
 
-toYear = udf(toYear, IntegerType())
-table0 = table0.withColumn('year', toYear('date'))
+toYear = udf(toYear, StringType())
+toDist = udf(toDist, StringType())
+usa = udf(usa, StringType())
+table0 = table0.withColumn('year', toYear('year'))
 table0 = table0.withColumn('district', toDist('district'))
+table0 = table0.withColumn('country_code', usa('country_code'))
+
+print(table0.show())
 
 numSplits = 100
 tempTable_split = table0.randomSplit( [1.0] * numSplits )
 
-print("Split table " + tab0 + " successfully.")
+print("Split table successfully.")
 
 # for every dataframe in the list...
 counter = 1
@@ -106,6 +133,9 @@ for df in tempTable_split:
     combinedTab = df.join(legislators.hint("broadcast"), \
                           on = ['state', 'district', 'year'], \
                           how = 'left_outer')
+
+    print("combined table... (" + str(counter) + " of " + str(numSplits) + ")")
+    print(combinedTab.show())
 
     # write the result to CDB
     print(tab0 + ': trying to write chunk ' + str(counter) + ' of ' + str(numSplits), file=sys.stdout) 

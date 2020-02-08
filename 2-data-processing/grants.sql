@@ -19,4 +19,4 @@ legal_entity_state_code
 
 
 -- read in and process X rows at a time, then write
--- group by month, year, industry
+-- group by month, year, industry, state, representative
