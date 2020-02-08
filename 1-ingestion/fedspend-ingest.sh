@@ -1,6 +1,6 @@
 # - # - # - # - # - # - # - # - # - # - # - #
 #
-#   SETTING UP SPARK CLUSTER
+#   SETTING UP POSTGRES DATABASE
 #   https://github.com/sanoke/fedspend/wiki/Data-pipeline:-Ingesting-data
 #
 # - # - # - # - # - # - # - # - # - # - # - #
