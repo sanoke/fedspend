@@ -46,36 +46,31 @@ for l in lc:
         y = 0
         term_length = int(t['end'][0:4]) - int(t['start'][0:4])
         # ...and for each year in the term
-        while y < term_length:
-            print("Parsing data for " + l['name']['first'] + " " + l['name']['last'] + \
-                  ": " + str(int(t['start'][0:4]) + y), file=sys.stdout) 
+        while y <= term_length:
             firstName.append(l['name']['first'])
-            print("     - appended the first name", file=sys.stdout) 
             lastName.append(l['name']['last'])
             typeOfRep.append(t['type'])
             party.append(t['party'])
             state.append(t['state'])
             district.append(t['district'])
             year.append(int(t['start'][0:4]) + y)
-            print("Parsed data for " + l['name']['first'] + " " + l['name']['last'] + \
-                  ": " + str(int(t['start'][0:4]) + y), file=sys.stdout) 
+            y += 1
 
 
 # repeat for file containing historical reps
 # NOTE manually placed JSON on each worker
 lh = spark.read.option('multiline','true').json('legislators-historical.json').collect()
 # for every legislator...
-for l in lc:
-    print("Parsing data for " + l['name']['first'] + " " + l['name']['last'], file=sys.stdout) 
+for l in lh:
     # ...and every term...
     for t in l['terms']:
         # we don't need data for legislators before 2000
         if int(t['start'][0:4]) < 2000: 
-            pass
+            continue
         y = 0
         term_length = int(t['end'][0:4]) - int(t['start'][0:4])
         # ...and for each year in the term
-        while y < term_length:
+        while y <= term_length:
             firstName.append(l['name']['first'])
             lastName.append(l['name']['last'])
             typeOfRep.append(t['type'])
@@ -83,6 +78,7 @@ for l in lc:
             state.append(t['state'])
             district.append(t['district'])
             year.append(int(t['start'][0:4]) + y)
+            y += 1
 
 
 # finally, combine our lists into a DataFrame
@@ -90,9 +86,6 @@ legislators = spark.createDataFrame(zip(firstName, lastName, typeOfRep, party,
                                         state, district, year), 
                                     schema=['firstName', 'lastName', 'typeOfRep',
                                             'party', 'state', 'district', 'year'])
-
-print(legislators.show(), file=sys.stdout) 
-print("Completed legislator data parsing.", file=sys.stdout) 
 
 # function to write joined table to cockroachDB    
 def writeTable(table0, tableName, saveMode="error"):
