@@ -21,15 +21,9 @@
         'Saturday'
       ],
       datasets: [{
-        data: [
-          15339,
-          21345,
-          18483,
-          24003,
-          23489,
-          24092,
-          12034
-        ],
+        data: [{% for item in yvals %}
+                  {{item}},
+                {% endfor %}],
         lineTension: 0,
         backgroundColor: 'transparent',
         borderColor: '#007bff',

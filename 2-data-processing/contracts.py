@@ -76,14 +76,13 @@ table0 = broadcast(spark.table("industry_labels")).join(spark.table("table0"), "
 def toYear(s):
     try:
         year = int(s[-4:])
+        if year < 1300:
+            int(s[0:4])
     except:
-        year = None
-    
-    try: 
-        year = int(s[0:4])
-    except: 
-        year = None
-
+        try: 
+            year = int(s[0:4])
+        except: 
+            year = None
     return(year)
 
 

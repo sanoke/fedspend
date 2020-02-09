@@ -84,7 +84,7 @@ for l in lh:
 # finally, combine our lists into a DataFrame
 legislators = spark.createDataFrame(zip(firstName, lastName, typeOfRep, party,
                                         state, district, year), 
-                                    schema=['firstName', 'lastName', 'typeOfRep',
+                                    schema=['firstname', 'lastname', 'typeofrep',
                                             'party', 'state', 'district', 'year'])
 
 # function to write joined table to cockroachDB    
@@ -101,3 +101,17 @@ def writeTable(table0, tableName, saveMode="error"):
     .option("user", "migrater") \
     .option("password", "RWwuvdj75Me4") \
     .save(mode=saveMode)
+
+# another function to write joined table to cockroachDB,
+# but writes in chunks
+def writeSplits(table, tableName, numSplits=3):
+    tempTable_split = table.randomSplit( [1.0] * numSplits )
+    print("Split table " + tableName + " successfully.")
+
+    # for every dataframe in the list...
+    counter = 1
+    for df in tempTable_split:
+        # write the result to CDB
+        writeTable(df, tableName, saveMode="append")
+        print(tableName + ': wrote chunk ' + str(counter) + ' of ' + str(numSplits), file=sys.stdout)
+        counter += 1

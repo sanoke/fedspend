@@ -131,6 +131,4 @@ SHOW DATABASES;
 # - OTHER: Decommissioning a node
 # - it's expensive to keep all four nodes going 
 # - so i decommissioned (i.e., removed) two of them
-# run the following commands on the node to be removed
-cockroach quit --decommission --certs-dir=certs --host=$CDB_NODE1_PRIVATE_IP
-pkill cockroach
+cockroach quit --decommission --certs-dir=certs --host=<private IP of node>

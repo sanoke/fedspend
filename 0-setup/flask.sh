@@ -52,8 +52,21 @@ sudo a2enmod wsgi
 
 # - 5 - CONNECT COCKROACHDB TO FLASK
 # https://www.cockroachlabs.com/docs/stable/build-a-python-app-with-cockroachdb.html
-pip3 install psycopg2
-# [TO DO]
+sudo apt install postgresql postgresql-contrib postgresql-server-dev-all
+pip3 install setuptools
+
+wget https://files.pythonhosted.org/packages/84/d7/6a93c99b5ba4d4d22daa3928b983cec66df4536ca50b22ce5dcac65e4e71/psycopg2-2.8.4.tar.gz
+tar -xf psycopg2-2.8.4.tar.gz
+cd psycopg2-2.8.4/
+python3 setup.py build
+sudo python3 setup.py install
+# Extracting psycopg2-2.8.4-py3.6-linux-x86_64.egg to /usr/local/lib/python3.6/dist-packages
+# Adding psycopg2 2.8.4 to easy-install.pth file
+
+pip3 install flask_sqlalchemy
+
+# ----- set some environment variables
+export DATABASE_URL="postgresql://10.0.0.13:26257/fedspend"
 
 
 # - 6 - MOVE FLASK FILES TO EC2 INSTANCE 
