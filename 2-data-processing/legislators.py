@@ -12,11 +12,12 @@
 from pyspark.sql import SparkSession 
 from pyspark.sql.types import IntegerType
 from pyspark.sql.functions import udf, col, expr
+import time
 import sys
 
 spark = SparkSession \
     .builder \
-    .appName("Writing analytic data to CockroachDB") \
+    .appName("Writing analytic contract data to CockroachDB") \
     .master("spark://10.0.0.10:7077") \
     .config("spark.jars", "/usr/local/spark/jars/postgresql-42.2.6.jar") \
     .config('spark.executor.memory', '24g') \
@@ -92,7 +93,7 @@ def writeTable(table0, tableName, saveMode="error"):
     # have to repartition the table b/c cockroachDB can't take too many rows
     # at a time, max is around 1000
     # https://forum.cockroachlabs.com/t/whats-the-best-way-to-do-bulk-insert/58
-    cluster   = 'jdbc:postgresql://10.0.0.13:26257/fedspend'
+    cluster   = 'jdbc:postgresql://10.0.0.17:26257/fedspend'
     table0.write \
     .format("jdbc") \
     .option("driver", "org.postgresql.Driver") \
@@ -112,9 +113,9 @@ def writeSplits(table, tableName, numSplits=100):
     counter = 1
     for df in tempTable_split:
         # write the result to CDB
-        print(df.show())
-        print(df.count())
         print(tableName + ': writing chunk ' + str(counter) + ' of ' + str(numSplits), file=sys.stdout)
         writeTable(df, tableName, saveMode="append")
         print(tableName + ': wrote chunk ' + str(counter) + ' of ' + str(numSplits), file=sys.stdout)
+        print("...letting CDB sleep for a minute.")
+        time.sleep(60)
         counter += 1
