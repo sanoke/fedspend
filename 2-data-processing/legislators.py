@@ -16,7 +16,7 @@ import sys
 
 spark = SparkSession \
     .builder \
-    .appName("Migration from PostgreSQL to CockroachDB") \
+    .appName("Writing analytic data to CockroachDB") \
     .master("spark://10.0.0.10:7077") \
     .config("spark.jars", "/usr/local/spark/jars/postgresql-42.2.6.jar") \
     .config('spark.executor.memory', '24g') \
@@ -104,7 +104,7 @@ def writeTable(table0, tableName, saveMode="error"):
 
 # another function to write joined table to cockroachDB,
 # but writes in chunks
-def writeSplits(table, tableName, numSplits=3):
+def writeSplits(table, tableName, numSplits=100):
     tempTable_split = table.randomSplit( [1.0] * numSplits )
     print("Split table " + tableName + " successfully.")
 
@@ -112,6 +112,9 @@ def writeSplits(table, tableName, numSplits=3):
     counter = 1
     for df in tempTable_split:
         # write the result to CDB
+        print(df.show())
+        print(df.count())
+        print(tableName + ': writing chunk ' + str(counter) + ' of ' + str(numSplits), file=sys.stdout)
         writeTable(df, tableName, saveMode="append")
         print(tableName + ': wrote chunk ' + str(counter) + ' of ' + str(numSplits), file=sys.stdout)
         counter += 1

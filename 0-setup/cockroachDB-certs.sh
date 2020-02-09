@@ -61,20 +61,7 @@ ssh ubuntu@$CDB_NODE3_PUBLIC_IP_DNS "mkdir certs"
 scp cockroach/certs/ca.crt cockroach/certs/node.crt cockroach/certs/node.key ubuntu@$CDB_NODE3_PUBLIC_IP_DNS:~/certs
 rm cockroach/certs/node.crt cockroach/certs/node.key    
 
-# 6.3 certificates for node 4
-cockroach cert create-node \
-  $CDB_NODE4_PRIVATE_IP \
-  $CDB_NODE4_PRIVATE_IP_DNS \
-  localhost \
-  127.0.0.1 \
-  $CDB_BALANCER_PRIVATE_IP \
-  --certs-dir=cockroach/certs \
-  --ca-key=cockroach/my-safe-directory/ca.key
-ssh ubuntu@$CDB_NODE4_PUBLIC_IP_DNS "mkdir certs"
-scp cockroach/certs/ca.crt cockroach/certs/node.crt cockroach/certs/node.key ubuntu@$CDB_NODE4_PUBLIC_IP_DNS:~/certs
-rm cockroach/certs/node.crt cockroach/certs/node.key    
-
-# 6.5 create client certificate and key for new users
+# 6.4 create client certificate and key for new users
 cockroach cert create-client \
 root \
 --certs-dir=cockroach/certs \

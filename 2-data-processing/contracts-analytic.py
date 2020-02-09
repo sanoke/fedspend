@@ -43,7 +43,7 @@ query = "(SELECT ROW_NUMBER() OVER(ORDER BY (SELECT NULL)) AS rno, " + \
         "t.legal_entity_congressional AS district, " + \
         "t.naics AS code, " + \
         "t.legal_entity_country_code AS country_code " + \
-        "FROM transaction_fpds t LIMIT 100000) XXX"
+        "FROM transaction_fpds t) XXX"
 
 # read the table from postgresql
 table0 = spark.read \
@@ -60,7 +60,7 @@ table0 = spark.read \
     .cache()
 
 # loading a second table of labels that i want to join to
-query2 = "(SELECT code, description FROM naics WHERE year = 2017) XXX"
+query2 = "(SELECT code, description FROM naics WHERE year = 2017 AND char_length(code) = 4) XXX"
 industry_labels = spark.read \
     .format("jdbc") \
     .option("driver", "org.postgresql.Driver") \
@@ -69,6 +69,15 @@ industry_labels = spark.read \
     .option("user", "root") \
     .option("password", "RWwuvdj75Me4") \
     .load()
+# clean up the industry code
+def toIndus(code):
+    try:
+        return code[0:4]
+    except:
+        return None
+toIndus = udf(toIndus, StringType())
+table0 = table0.withColumn('code', toIndus('code'))
+
 industry_labels.createOrReplaceTempView("industry_labels")
 table0.createOrReplaceTempView("table0")
 table0 = broadcast(spark.table("industry_labels")).join(spark.table("table0"), "code", "right_outer")
@@ -154,7 +163,7 @@ query2r = "(SELECT firstname AS firstname, " + \
           "GROUP BY year, firstname, lastname, description " + \
           "ORDER BY year, firstname, lastname, description )"
 legis_by_year_HR = spark.sql(query2r)
-writeTable(legis_by_year_HR, 'legis_by_year_HR')
+writeSplits(legis_by_year_HR, 'legis_by_year_HR')
 
 query2s = "(SELECT firstname AS firstname, " + \
                  "lastname AS lastname, " + \
@@ -170,7 +179,7 @@ query2s = "(SELECT firstname AS firstname, " + \
           "GROUP BY year, firstname, lastname, description " + \
           "ORDER BY year, firstname, lastname, description )"
 legis_by_year_SEN = spark.sql(query2s)
-writeTable(legis_by_year_SEN, 'legis_by_year_SEN')
+writeSplits(legis_by_year_SEN, 'legis_by_year_SEN')
 
 
 # - industry: total $ by year, state, by party
@@ -184,7 +193,7 @@ query3r = "(SELECT SUM(amount) AS amount, " + \
           "GROUP BY description, year, state, party " + \
           "ORDER BY description, year, state, party )"
 indus_by_year_HR = spark.sql(query3r)
-writeTable(indus_by_year_HR, 'indus_by_year_HR')
+writeSplits(indus_by_year_HR, 'indus_by_year_HR')
 
 query3s = "(SELECT SUM(amount) AS amount, " + \
                  "MAX(state_name) AS state_name, " + \
@@ -196,7 +205,7 @@ query3s = "(SELECT SUM(amount) AS amount, " + \
           "GROUP BY description, year, state, party " + \
           "ORDER BY description, year, state, party )"
 indus_by_year_SEN = spark.sql(query3s)
-writeTable(indus_by_year_SEN, 'indus_by_year_SEN')
+writeSplits(indus_by_year_SEN, 'indus_by_year_SEN')
 
 
 # - states: total $ and money/people ratio by year
@@ -211,7 +220,7 @@ query4r = "(SELECT SUM(amount) AS amount, " + \
           "GROUP BY year, state, party " + \
           "ORDER BY year, state, party )"
 state_by_year_HR = spark.sql(query4r)
-writeTable(state_by_year_HR, 'state_by_year_HR')
+writeSplits(state_by_year_HR, 'state_by_year_HR')
 
 query4s = "(SELECT SUM(amount) AS amount, " + \
                  "MAX(state_name) AS state_name, " + \
@@ -224,4 +233,4 @@ query4s = "(SELECT SUM(amount) AS amount, " + \
           "GROUP BY year, state, party " + \
           "ORDER BY year, state, party )"
 state_by_year_SEN = spark.sql(query4s)
-writeTable(state_by_year_SEN, 'state_by_year_SEN')
+writeSplits(state_by_year_SEN, 'state_by_year_SEN')

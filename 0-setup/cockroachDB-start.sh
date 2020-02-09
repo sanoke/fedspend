@@ -12,7 +12,22 @@
 
 # - 3 - Create a cluster security group and add the instances 
 
-# - 4 - Set up time sync on each node 
+# - 4 - Set up time sync on each node
+sudo apt update
+sudo apt install chrony
+
+# here we'll open a file...
+sudo nano /etc/chrony/chrony.conf
+# ...and paste the following text above any pool or server statements
+# -> server 169.254.169.123 prefer iburst minpoll 4 maxpoll 4
+sudo /etc/init.d/chrony restart
+
+# verify that chrony is using the 169.254.169.123 IP address 
+#   to synchronize the time
+chronyc sources -v
+
+# verify the time synchronization metrics that are reported by chrony
+chronyc tracking
 
 # - 5 - Set up load balancing
 
