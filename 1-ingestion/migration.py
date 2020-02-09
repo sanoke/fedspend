@@ -21,13 +21,15 @@ for idx in range(numTables):
     tab0   = pkeys[idx]["table_name"]
 
     # tables not being migrated for one reason or another
+    # (debugging)
     skip_tables = ['transaction_fabs', 'legal_entity', 'financial_accounts_by_awards',
                    'temp_dev3319_transactions_with_diff', 'references_location', 
                    'django_migrations', 'filter_hash', 'django_session', 
                    'rosetta', 'tas_program_activity_object_class_quarterly',
                    'auth_group', 'agency', 'appropriation_account_balances',
                    'ref_city_county_code', 'transaction_delta', 'frec_map']
-    if tab0 in skip_tables:
+    select_tables = ['state_data','overall_totals']
+    if tab0 not in select_tables:
         print("Skipped table " + tab0)
         continue
 

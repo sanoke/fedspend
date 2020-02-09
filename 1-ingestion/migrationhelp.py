@@ -86,9 +86,8 @@ pkeys = spark.sql("SELECT k.table_name, k.column_name as pkey, " + \
 
 # function to read a table from postgresql 
 def readTable(tableName, pkey, rowNum, numPartitions):
-    query = "(SELECT * FROM " + \
-               "(SELECT ROW_NUMBER() OVER(ORDER BY (SELECT NULL)) AS rno, * from " + tableName + ")" + \
-             "WHERE rno < 2000000) XXX"
+    query = "(SELECT ROW_NUMBER() OVER(ORDER BY (SELECT NULL)) AS rno, * from " + \
+            tableName + ") XXX"
     # read the table from postgresql
     try: 
         table0 = spark.read \
