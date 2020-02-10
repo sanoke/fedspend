@@ -47,13 +47,7 @@
 
           <main role="main" class="col-md-8 ml-sm-auto col-lg-9 px-4">
             <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-1 mb-1">
-              <h1 class="h2">US Government Contracts <br />
-              {% if industry %}
-                  <small class="text-muted"><strong>Industry:</strong> {{ industry }}</small>
-              {% else %}
-                  <small class="text-muted"><strong>Industry:</strong> none selected</small>
-              {% endif %}
-              </h1>
+              <h1 class="h2">US Government Contracts</h1>
             </div>
 
             <div class='border-bottom'>
@@ -64,13 +58,24 @@
                 <li>This value is disaggregated by the political party of the <em>House of Representatives</em> representative during that year, for the recipient's congressional district. </li>
               </ul>
             </div>
-            <h4 class="pt-3 mt-3">Overall view of industry funding</h4>
+            <h4 class="pt-3 mt-3">Overall view of funding <br />
+              {% if industry %}
+              <small class="text-info"><strong>Industry:</strong> {{ industry }}</small>
+              {% else %}
+                  <small class="text-muted"><strong>Industry:</strong> none selected</small>
+              {% endif %}
+            </h4>
             <p class="text-muted"><strong>Note</strong> <em>y</em>-axis is in millions of dollars</p>
             <canvas class="my-4 w-100" id="myChart" width="900" height="380"></canvas>
 
             {% if legis_totals %}
               <h4>Cumulative payments in a year: Top 15 legislators</h4>
-              <h5>Industry funding by legislator</h5>
+              <h5>
+                {% if industry %}
+                <span class="text-info"><strong>{{ industry }}</strong></span> funding by legislator
+                {% else %}
+                {% endif %}
+              </h5>
               <div class="pb-2">
                 For every government <em>obligation</em> (i.e., binding agreement to pay) 
                 to a private company
@@ -82,11 +87,10 @@
                 the recipient's House of Representatives representative was identified. 
                 <br />
                 Obligated amounts were aggregated by representative and year, then sorted by annual amount. <br />
-                The top 15 annual amounts are displayed below, with the associated representative.
+                The top 15 annual amounts within the last five years are displayed below, with the associated representative.
                 <ul>
                   <li>The representative's name is colored to indicate their political party.</li>
-                  <li><em>Total $ contracts</em> represents the total obligated amount for the indicated calendar year, for reci
-                    pients within that representative's congressional district.</li>
+                  <li><em>Total $ contracts</em> represents the total obligated amount for the indicated calendar year, for recipients within that representative's congressional district.</li>
                   <li> Two ratios are given to allow for direct comparison of representatives and their total contract amounts. 
                     <ol>
                       <li><em>$ / constituent</em> is the <em>total $ contracts</em> divided by the 2010 Census state population count.<br />
