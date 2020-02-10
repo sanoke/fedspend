@@ -10,7 +10,7 @@ A tool to see where federal money is going with additional information on associ
 
 Companies are interested in the distribution of US federal spending on government contracts, across industries and across states, to direct investment or expansion decisions. Taxpayers are also interested because this is their money being spent on their behalf, and the spending should be in line with their priorities.
 
-While federal laws [mandate](https://www.usaspending.gov/#/about) the public accessibility of federal spending data, available exploratory tools are focused on individual payments and the data are provided without context. [[FedSpend](http://engineerdata.xyz)] is designed to address this gap in accessibility, by linking federal payments to the recipient's House and Senate representatives. The data are aggregated to abstract away government peculiarities and presented via UI with additional state demographic information. 
+While federal laws [mandate](https://www.usaspending.gov/#/about) the public accessibility of federal spending data, available exploratory tools are focused on individual payments and the data are provided without context. [FedSpend](http://engineerdata.xyz) is designed to address this gap in accessibility, by linking federal payments to the recipient's House and Senate representatives. The data are aggregated to abstract away government peculiarities and presented via UI with additional state demographic information. 
 
 <hr/>
 
