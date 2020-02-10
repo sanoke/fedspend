@@ -19,4 +19,3 @@ Scripts in this directory are not meant to be run, but contain individual comman
 
 #### `flask.sh` 
 [[Details](https://github.com/sanoke/fedspend/wiki/Setting-Up:-Flask)] Instructions for setting up Apache web server and Flask connection to CockroachDB/ 
-
