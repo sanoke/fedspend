@@ -105,7 +105,7 @@ def writeTable(table0, tableName, saveMode="error"):
 
 # another function to write joined table to cockroachDB,
 # but writes in chunks
-def writeSplits(table, tableName, numSplits=100):
+def writeSplits(table, tableName, numSplits=10):
     tempTable_split = table.randomSplit( [1.0] * numSplits )
     print("Split table " + tableName + " successfully.")
 
@@ -116,6 +116,6 @@ def writeSplits(table, tableName, numSplits=100):
         print(tableName + ': writing chunk ' + str(counter) + ' of ' + str(numSplits), file=sys.stdout)
         writeTable(df, tableName, saveMode="append")
         print(tableName + ': wrote chunk ' + str(counter) + ' of ' + str(numSplits), file=sys.stdout)
-        print("...letting CDB sleep for a minute.")
-        time.sleep(60)
+        print("...giving CDB a short break.")
+        time.sleep(10)
         counter += 1
