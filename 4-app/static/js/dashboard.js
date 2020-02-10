@@ -6,24 +6,29 @@
   feather.replace()
 
   // Graphs
-  var ctx = document.getElementById('myChart')
+  var ctx = document.getElementById('myChart2')
   // eslint-disable-next-line no-unused-vars
-  var myChart = new Chart(ctx, {
+  var myChart2 = new Chart(ctx, {
     type: 'line',
     data: {
-      labels: [
-        'Sunday',
-        'Monday',
-        'Tuesday',
-        'Wednesday',
-        'Thursday',
-        'Friday',
-        'Saturday'
-      ],
-      datasets: [{
-        data: [{% for item in yvals %}
-                  {{item}},
+      labels: [ {% for item in dem_totals %}
+                  {{ item[1] }},
                 {% endfor %}],
+      datasets: [{
+        label: 'Democrat'
+        data: [{% for item in dem_totals %}
+                  {{ item[0] }},
+                {% endfor %}],
+        lineTension: 0,
+        backgroundColor: 'transparent',
+        borderColor: '#007bff',
+        borderWidth: 4,
+        pointBackgroundColor: '#007bff'
+      }, {
+        label: 'Republican'
+        data: [{% for item in repub_totals %}
+                  {{ item[0] }},
+               {% endfor %}],
         lineTension: 0,
         backgroundColor: 'transparent',
         borderColor: '#007bff',

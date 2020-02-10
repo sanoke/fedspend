@@ -12,13 +12,31 @@ def get_db():
                                   sslcert='certs/client.sanoke.crt',
                                   password='RWwuvdj75Me4',
                                   port=26257,
-                                  host='10.0.0.13')
-    return connection	
+                                  host='10.0.0.17')
+    return connection
 
 def get_data(query):
-	con = get_db()
-	curs = con.cursor()
-	curs.execute(query)
-	data_list = curs.fetchall()
-	# port_list = [port[0] for port in port_list]
-	return data_list
+    con = get_db()
+    curs = con.cursor()
+    curs.execute(query)
+    data_list = curs.fetchall()
+    curs.close()
+    con.close()
+    return data_list
+
+def get_data_filtered(query1, query2):
+    con = get_db()
+    curs = con.cursor()
+    curs.execute(query1, query2)
+    data_list = curs.fetchall()
+    curs.close()
+    con.close()
+    return data_list
+
+industry_list_q = '''
+SELECT DISTINCT description 
+FROM legis_by_year_hr
+WHERE description != 'None'
+ORDER BY description;
+'''
+industry_list = get_data(industry_list_q)

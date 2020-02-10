@@ -16,11 +16,8 @@ def root():
 
 
 @app.route('/flaskapp/')
-# @app.route('/flaskapp/<name>')
-# def index(name=None):
-#   author = request.args.get('author')
-#   return render_template('index.html', name=author)
-def index(name=None):
+# @app.route('/flaskapp/<industry>')
+def index():
   yvals = [15339,
            21345,
            18483,
@@ -28,19 +25,54 @@ def index(name=None):
            23489,
            24092,
            12034]
-  query = ''' 
-  SELECT year, sum(amount) FROM (
-    SELECT DISTINCT * FROM (
-        SELECT *
-        FROM govcontract_data
-        WHERE "firstName" = 'Tim'
-        AND "lastName" = 'Ryan'
-        AND state = 'OH'
-        AND district = '13'))
-    GROUP BY year;
+  query = '''
+  SELECT *
+  FROM legis_by_year_hr
+  LIMIT 1;
   '''
   data_list = get_data(query)
-  return render_template('index.html', name=data_list, yvals=yvals)           
+  industry = request.args.get('industry')
+  if industry is None:
+    return render_template('index.html', \
+                          industry = industry, \
+                          yvals = yvals, \
+                          industry_list = industry_list,
+                          dem_totals = [(0,0)],
+                          repub_totals = [(0,0)],
+                          legis_totals = None)
+  else:
+    industry_totals_q = '''
+    SELECT SUM(amount), party, year, description
+    FROM indus_by_year_hr
+    WHERE description = %s
+    GROUP BY year, party, description
+    ORDER BY year, party
+    '''
+    industry_totals = get_data_filtered(industry_totals_q, (industry,))
+
+    dem_totals = [(amt[0],amt[2]) for amt in industry_totals if amt[1] == 'Democrat']
+    repub_totals = [(amt[0],amt[2]) for amt in industry_totals if amt[1] == 'Republican']
+
+    legis_totals_q = '''
+     SELECT firstname, lastname, description,
+            party, district, state_name, year,
+            ROUND( amount / 10^6, 2) AS amount_r,
+            ROUND( amount / population, 2) AS contract_pp,
+            ROUND( amount / med_hh_income, 2) as contract_income
+      FROM legis_by_year_hr
+      WHERE description = %s
+      AND year > '2014'
+      ORDER BY amount DESC
+      LIMIT 15
+    '''
+    legis_totals = get_data_filtered(legis_totals_q, (industry,))
+
+    return render_template('index.html', \
+                          industry = industry, \
+                          industry_list = industry_list, \
+                          dem_totals = dem_totals, \
+                          repub_totals = repub_totals,
+                          legis_totals = legis_totals)
 
 
 if __name__ == '__main__':
