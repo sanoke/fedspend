@@ -1,3 +1,5 @@
 # Database scripts
 
-Use this to create databases, scripts to create tables, user permissions. Do not put your database passwords here.
+This directory contains SQL that was used to generate analytic tables.
+
+These scripts are for reference, the particular SQL that was run is contained within the [data processing](https://github.com/sanoke/fedspend/tree/master/2-data-processing) PySpark scripts. 
