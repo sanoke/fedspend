@@ -1,2 +1,0 @@
-from flaskapp import db
-
