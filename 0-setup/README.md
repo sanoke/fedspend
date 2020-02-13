@@ -18,8 +18,9 @@ Scripts in this directory are not meant to be run, but contain individual comman
 
 
 #### `flask.sh` 
-[[Details](https://github.com/sanoke/fedspend/wiki/Setting-Up:-Flask)] Instructions for setting up Apache web server and Flask connection to CockroachDB/ 
+[[Details](https://github.com/sanoke/fedspend/wiki/Setting-Up:-Flask)] Instructions for setting up Apache web server and Flask connection to CockroachDB
 
 #### TO DO
-- [ ] add Python script for version control
-- [ ] add airflow script + documentation
+- [x] add version control and Airflow to architecture schema
+- [ ] add documentation about version control 
+- [ ] add documentation about airflow scheduling
