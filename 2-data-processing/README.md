@@ -16,3 +16,6 @@ PySpark script for joining federal spending contract data to legislator data, an
 
 #### `USAspendingGlossary.xlsx`
 Reference document from [USASpending.gov](http://www.usaspending.gov) to understand the terminology used within the federal spending dataset. 
+
+####  `version_control.md`
+Some notes on what version control looks like
