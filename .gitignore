@@ -6,6 +6,7 @@
 /setup-scripts/*
 /0-setup/vars.env
 /screencast/*
+/.vscode/*
 
 venv/
 *.pyc
