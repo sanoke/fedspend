@@ -5,6 +5,7 @@
 /zz-node-dump/*
 /setup-scripts/*
 /0-setup/vars.env
+/screencast/*
 
 venv/
 *.pyc
