@@ -1,5 +1,5 @@
 # FedSpend 
-- Presentation ([Screencast](https://www.youtube.com/watch?v=lfTFdWQ1IWg))] 
+- Presentation ([Screencast](https://www.youtube.com/watch?v=lfTFdWQ1IWg))
 - [Slides](https://docs.google.com/presentation/d/1KTjFM93Z1USEoJl7P9blTCVDJaPI7bXSucENJ3FTMcg/edit?usp=sharing)
 - [UI](http://engineerdata.xyz) (down) ([Screencast](https://www.youtube.com/watch?v=-knV-ZPerz8))
 - Data wrangling work ([separate branch](https://github.com/sanoke/fedspend/tree/v2))
