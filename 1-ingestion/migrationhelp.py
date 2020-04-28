@@ -1,6 +1,6 @@
 #   HELPER FUNCTIONS AND OBJECTS FOR POSTGRESQL MIGRATION
 
-from pyspark.sql import SparkSession 
+from pyspark.sql import SparkSession
 import sys
 
 spark = SparkSession \
@@ -29,7 +29,7 @@ tables = spark.read \
     .load() \
     .filter("table_schema = 'public' AND table_type='BASE TABLE'")
 
-# dynamically determine name of PK in each table  
+# dynamically determine name of PK in each table
 keys = spark.read \
     .format("jdbc") \
     .option("driver", "org.postgresql.Driver") \
@@ -37,7 +37,7 @@ keys = spark.read \
     .option("dbtable", "information_schema.key_column_usage") \
     .option("user", "root") \
     .option("password", "RWwuvdj75Me4") \
-    .load() 
+    .load()
 
 # helper table to combine table names with their PK
 constraints = spark.read \
@@ -47,7 +47,7 @@ constraints = spark.read \
     .option("dbtable", "information_schema.table_constraints") \
     .option("user", "root") \
     .option("password", "RWwuvdj75Me4") \
-    .load()     
+    .load()
 
 
 query = "(SELECT reltuples as approx_cnt, relname as table_name FROM pg_class) XXX"
@@ -62,8 +62,9 @@ rowNum = spark.read \
     .option("password", "RWwuvdj75Me4") \
     .load()
 
+
 # register the above DataFrames as a SQL temporary view
-tables.createOrReplaceTempView("tables")    
+tables.createOrReplaceTempView("tables")
 keys.createOrReplaceTempView("keys")
 constraints.createOrReplaceTempView("constraints")
 rowNum.createOrReplaceTempView("rowNum")
@@ -83,13 +84,12 @@ pkeys = spark.sql("SELECT k.table_name, k.column_name as pkey, " + \
                   "WHERE c.constraint_type = 'PRIMARY KEY'").collect()
 
 
-
-# function to read a table from postgresql 
+# function to read a table from postgresql
 def readTable(tableName, pkey, rowNum, numPartitions):
     query = "(SELECT ROW_NUMBER() OVER(ORDER BY (SELECT NULL)) AS rno, * from " + \
             tableName + ") XXX"
     # read the table from postgresql
-    try: 
+    try:
         table0 = spark.read \
         .format("jdbc") \
         .option("driver", "org.postgresql.Driver") \
@@ -102,16 +102,16 @@ def readTable(tableName, pkey, rowNum, numPartitions):
         .option("numPartitions", numPartitions) \
         .load() \
         .cache()
-    except: 
-        print("There's an issue with the partition process.", file=sys.stdout) 
-        
+    except:
+        print("There's an issue with the partition process.", file=sys.stdout)
+
     print("There are " + str(table0.rdd.getNumPartitions()) + " partitions " + \
-          "across " + str(rowNum) + " rows.", file=sys.stdout) 
+          "across " + str(rowNum) + " rows.", file=sys.stdout)
 
     return table0
 
 
-# function to write a table to cockroachDB    
+# function to write a table to cockroachDB
 def writeTable(table0, tableName, saveMode="error"):
     # have to repartition the table b/c cockroachDB can't take too many rows
     # at a time, max is around 1000
