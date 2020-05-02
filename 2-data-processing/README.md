@@ -5,13 +5,6 @@ These scripts are used to extract and aggregate contract data from the federal s
 All of the above are done in PySpark. 
 
 
-#### `congressional_pop.py`
-[source](https://www.census.gov/programs-surveys/acs/data/summary-file.html) 
-
-[source](https://www2.census.gov/programs-surveys/acs/summary_file/2018/data/?#)
-[source](https://www2.census.gov/programs-surveys/acs/summary_file/2018/data/README_2018_FTP_Archives.pdf)
-
-
 #### `legislators.py`
 [[Details](https://github.com/sanoke/fedspend/wiki/Data-pipeline:-Ingesting-data#historical-legislator-data)] PySpark script for ingesting [legislator information](https://github.com/unitedstates/congress-legislators); loaded as a module within federal spending processing.
 
