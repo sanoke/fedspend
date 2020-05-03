@@ -281,7 +281,7 @@ ll = ll.join(income, \
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 
-# function to write table to cockroachDB
+# write DataFrame to cockroachDB
 def writeTable(db, table0, tableName, saveMode="error"):
     # have to repartition the table b/c cockroachDB can't take too many rows
     # at a time, max is around 1000
@@ -298,8 +298,7 @@ def writeTable(db, table0, tableName, saveMode="error"):
 
 
 
-# another function to write joined table to cockroachDB,
-# but writes in chunks
+# write DataFrame to cockroachDB, in chunks
 def writeSplits(table, tableName, numSplits=10):
     tempTable_split = table.randomSplit( [1.0] * numSplits )
     print("Split table " + tableName + " successfully.")

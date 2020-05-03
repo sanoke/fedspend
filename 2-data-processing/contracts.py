@@ -1,14 +1,16 @@
 # IMPORTING GOVERNMENT CONTRACT DATA + JOIN WITH LEGISLATOR
+# (SCRIPT FOR MIGRATION)
 # - provided by https://github.com/unitedstates/congress-legislators
+# this script 
+# 1 - imports the contract data
+# 2 - joins it to legislator data
+# 3 - writes entire table (millons of rows) in chunks to specified database
 # wget https://theunitedstates.io/congress-legislators/legislators-current.json
 # wget https://theunitedstates.io/congress-legislators/legislators-historical.json
 # scp 2-data-processing/*.py ubuntu@$POSTGRES_PUBLIC_IP_DNS:~
 # tmux set-option -g history-limit 5000 \; new-session
 # time spark-submit --driver-memory 48g contracts.py > sparrk-output.txt
 
-# strategy is to read in legislator JSON,
-# parse into several lists, 
-# then create a pySpark DataFrame from those lists 
 
 from pyspark.sql import SparkSession 
 from pyspark.sql.types import IntegerType, StringType
@@ -34,7 +36,7 @@ spark = SparkSession \
     .getOrCreate()
 
 
-# pull contract data from postgresql (71+ million rows)
+# query to pull contract data from postgresql (71+ million rows)
 query = "(SELECT ROW_NUMBER() OVER(ORDER BY (SELECT NULL)) AS rno, " + \
         "t.action_date AS year, " + \
         "t.federal_action_obligation AS amount, " + \
@@ -43,6 +45,7 @@ query = "(SELECT ROW_NUMBER() OVER(ORDER BY (SELECT NULL)) AS rno, " + \
         "t.naics AS code, " + \
         "t.legal_entity_country_code AS country_code " + \
         "FROM transaction_fpds t ) XXX" 
+
 
 # read the table from postgresql
 table0 = spark.read \
@@ -58,7 +61,8 @@ table0 = spark.read \
     .load() \
     .cache()
 
-# loading a second table of labels that i want to join to
+
+# loading second table of industry labels
 query2 = "(SELECT code, description FROM naics WHERE year = 2017) XXX"
 industry_labels = spark.read \
     .format("jdbc") \
@@ -71,6 +75,7 @@ industry_labels = spark.read \
 industry_labels.createOrReplaceTempView("industry_labels")
 table0.createOrReplaceTempView("table0")
 table0 = broadcast(spark.table("industry_labels")).join(spark.table("table0"), "code", "left_outer")
+
 
 # some light cleaning of date strings to just year
 def toYear(s):
@@ -114,6 +119,9 @@ table0 = table0.withColumn('year', toYear('year'))
 table0 = table0.withColumn('district', toDist('district'))
 table0 = table0.withColumn('country_code', usa('country_code'))
 
+
+# --- SPLITTING DATAFRAME
+
 numSplits = 100
 tempTable_split = table0.randomSplit( [1.0] * numSplits )
 
@@ -126,9 +134,9 @@ for df in tempTable_split:
 
     # broadcast the smaller legislator dataset to workers 
     # then join to financial data
+    # (no need to specify 'how'; when 'on' is a list of strings, join is inner)
     combinedTab = df.join(legislators.hint("broadcast"), \
-                          on = ['state', 'district', 'year'], \
-                          how = 'left_outer')
+                          on = ['state', 'district', 'year'])
 
     # write the result to CDB
     writeTable(combinedTab, tab0, saveMode="append")
