@@ -6,7 +6,7 @@ All of the above are done in PySpark.
 
 
 #### `legislators.py`
-[[Details](https://github.com/sanoke/fedspend/wiki/Data-pipeline:-Ingesting-data#historical-legislator-data)] PySpark script for ingesting [legislator information](https://github.com/unitedstates/congress-legislators); loaded as a module within federal spending processing.
+[[Details](https://github.com/sanoke/fedspend/wiki/Data-pipeline:-Ingesting-data#historical-legislator-data)] PySpark script for ingesting [legislator](https://github.com/unitedstates/congress-legislators), income, and population information; loaded as a module within federal spending processing.
 
 #### `contracts.py`, `grants.py` 
 PySpark script for joining federal spending *contract* (payment for goods or service) and *grant* (provision of money to serve a public purpose) data to legislator data, and writing to CockroachDB. No aggregation done in these script, to allow a data scientist some analytic flexibility. 
